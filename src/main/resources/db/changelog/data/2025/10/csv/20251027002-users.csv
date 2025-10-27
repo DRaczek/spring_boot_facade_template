@@ -1,0 +1,3 @@
+id;uuid;username;password_hash;enabled;created_date;user_id_created;last_modified_date;user_id_last_modified;status;version
+2;f1273d55-14da-4c3e-b74e-d1ffb181538d;draczekprojekt@gmail.com;$2a$12$Q9suLxc/qsh3y7Zol0ShvOxTDy5uPZFDY254Qv3K1lc4XFgimCl/C;true;2022-11-29 00:00:00;1;2022-11-29 00:00:00;1;1;0
+3;f6fe6282-cb3c-4289-9c1d-b879be9479cc;godzina.wychowawcza12@gmail.com;$2a$10$N3UYqAblcf7of/3BNnCtauEydheifdLDbkSqxcsxcmD8PNpoKKHjC;true;2022-11-29 00:00:00;1;2022-11-29 00:00:00;1;1;0

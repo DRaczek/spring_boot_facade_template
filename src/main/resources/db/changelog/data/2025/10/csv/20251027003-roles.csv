@@ -1,0 +1,4 @@
+id;uuid;name;created_date;user_id_created;last_modified_date;user_id_last_modified;status;version
+1;027357a8-f784-4c4b-96c4-475481dc5df2;ROLE_SUPER_ADMIN;2022-11-29 12:00:00;1;2022-11-29 12:00:00;1;1;0
+2;c0dc4f98-9563-4fe3-b959-8ef4509893af;ROLE_ADMIN;2022-11-29 12:00:00;1;2022-11-29 12:00:00;1;1;0
+3;2b109fa4-3467-4133-ae63-cb8580083e4c;ROLE_USER;2022-11-29 12:00:00;1;2022-11-29 12:00:00;1;1;0

@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
+
+    <changeSet id="20231020-import-data" author="draczek" dbms="postgresql" runAlways="false" runOnChange="true">
+
+        <loadData tableName="users" separator=";" file="csv/20251027001-users.csv" relativeToChangelogFile="true"/>
+        <loadData tableName="users" separator=";" file="csv/20251027002-users.csv" relativeToChangelogFile="true"/>
+        <sql dbms="postgresql">select setval('users_id_seq', (select max(id)+1 from users), false)</sql>
+
+        <loadData tableName="accounts" separator=";" file="csv/20251027005-accounts.csv" relativeToChangelogFile="true"/>
+        <sql dbms="postgresql">select setval('accounts_id_seq', (select max(id)+1 from accounts), false)</sql>
+
+        <loadData tableName="roles" separator=";" file="csv/20251027003-roles.csv" relativeToChangelogFile="true"/>
+        <sql dbms="postgresql">select setval('roles_id_seq', (select max(id)+1 from roles), false)</sql>
+
+        <loadData tableName="users_roles" separator=";" file="csv/20251027004-users_roles.csv" relativeToChangelogFile="true"/>
+        <sql dbms="postgresql">select setval('users_roles_id_seq', (select max(id)+1 from users_roles), false)</sql>
+
+    </changeSet>
+
+</databaseChangeLog>
