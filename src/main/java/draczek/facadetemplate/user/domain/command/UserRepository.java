@@ -15,6 +15,7 @@ interface UserRepository extends JpaRepository<User, Long>,
     JpaSpecificationExecutor<User> {
 
   Optional<User> findOneByUsernameAndStatus(String username, StatusEnum status);
+  Optional<User> findOneByUsername(String username);
 
   /**
    * Method for fetching User.
