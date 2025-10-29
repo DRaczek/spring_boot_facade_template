@@ -33,18 +33,18 @@ class BaseITSpecification extends Specification {
     @Autowired
     AuthenticationManager authenticationManager
 
-    String getInitPasswordLoginUserApp() {
+    String getInitPassword() {
         return PASSWORD
     }
 
-    User getLoginUserApp() {
+    User getLoggedInUser() {
         return userRepository.get(USERNAME, StatusEnum.ACTIVE)
     }
 
-    String getTokenLoginUserApp(String username, String password) {
+    String getToken(String username, String password) {
         def dto = new LoginDto(username, password)
-        def tokenUserAppDto = authenticationFacade.login(dto)
-        return tokenUserAppDto.accessToken
+        def userTokenDto = authenticationFacade.login(dto)
+        return userTokenDto.token
     }
 
     HttpHeaders getFullAccessAuthHttpHeader() {
@@ -52,7 +52,7 @@ class BaseITSpecification extends Specification {
     }
 
     HttpHeaders getFullAccessAuthHttpHeader(String username, String password) {
-        def bearerToken = getTokenLoginUserApp(username, password)
+        def bearerToken = getToken(username, password)
         def headers = new HttpHeaders()
         headers.setContentType(MediaType.APPLICATION_JSON)
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON))
