@@ -3,12 +3,17 @@ package draczek.facadetemplate.auth
 import draczek.facadetemplate.BaseCleanupSpecification
 import draczek.facadetemplate.common.enumerated.StatusEnum
 import draczek.facadetemplate.common.exception.DtoInvalidException
+import draczek.facadetemplate.user.UserHelper
 import draczek.facadetemplate.user.domain.dto.UserTokenDto
 import draczek.facadetemplate.userActionToken.domain.command.UserActionToken
 import draczek.facadetemplate.userActionToken.domain.enumerated.UserActionTokenEnum
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+
+import java.time.LocalDateTime
 
 @SuppressWarnings("GroovyAccessibility")
 class AuthSpecIT extends BaseCleanupSpecification {
@@ -18,11 +23,16 @@ class AuthSpecIT extends BaseCleanupSpecification {
     private static final String REGISTRATION_URL = "$BASE_URL/register"
     private static final String LOGIN_URL = "$BASE_URL/login"
     private static final String ACTIVATION_URL = "$BASE_URL/activate"
+    private static final String REFRESH_TOKEN_URL = "$BASE_URL/refresh-token"
+    private static final String LOGOUT_TOKEN_URL = "$BASE_URL/logout"
     private static final String RESET_PASSWORD_STEP_1_URL = "$RESET_PASSWORD_URL/step-1"
     private static final String RESET_PASSWORD_STEP_2_URL = "$RESET_PASSWORD_URL/step-2"
 
+
     @Autowired
     AuthHelper authHelper
+    @Autowired
+    UserHelper userHelper
 
     def "should throws exception when incorrect required fields"() {
         given:
@@ -146,4 +156,125 @@ class AuthSpecIT extends BaseCleanupSpecification {
         response.statusCode == HttpStatus.OK
         response.body.token.length() > 0
     }
+
+    def "should refresh user's token"() {
+        given:
+        def refreshToken = "testRefreshToken"
+        def user = userHelper.fetchUser(USERNAME)
+        authHelper.createRefreshToken(
+                user,
+                refreshToken,
+                LocalDateTime.now().plusYears(999)
+        )
+        and:
+        def dto = authHelper.buildRefreshTokenDto(
+                token: refreshToken
+        )
+        when:
+        def response = restTemplate.postForEntity(
+                REFRESH_TOKEN_URL,
+                dto,
+                UserTokenDto.class
+        )
+        then:
+        response.statusCode == HttpStatus.OK
+        response.body.token.length() > 0
+        response.body.refreshToken == refreshToken
+    }
+
+    def "should create new refresh token when expiring"() {
+        given:
+        def refreshToken = "testRefreshToken"
+        def user = userHelper.fetchUser(USERNAME)
+        authHelper.createRefreshToken(
+                user,
+                refreshToken,
+                LocalDateTime.now().plusMinutes(1)
+        )
+        and:
+        def dto = authHelper.buildRefreshTokenDto(
+                token: refreshToken
+        )
+        when:
+        def response = restTemplate.postForEntity(
+                REFRESH_TOKEN_URL,
+                dto,
+                UserTokenDto.class
+        )
+        then:
+        response.statusCode == HttpStatus.OK
+        response.body.token.length() > 0
+        response.body.refreshToken.length() > 0
+        response.body.refreshToken != refreshToken
+    }
+
+    def "should throw not found exception when token has expired"() {
+        given:
+        def refreshToken = "testRefreshToken"
+        def user = userHelper.fetchUser(USERNAME)
+        authHelper.createRefreshToken(
+                user,
+                refreshToken,
+                LocalDateTime.now().minusMinutes(1)
+        )
+        and:
+        def dto = authHelper.buildRefreshTokenDto(
+                token: refreshToken
+        )
+        when:
+        def response = restTemplate.postForEntity(
+                REFRESH_TOKEN_URL,
+                dto,
+                UserTokenDto.class
+        )
+        then:
+        response.statusCode == HttpStatus.NOT_FOUND
+        authHelper.checkIfTheRefreshTokenGotSafeDeleted()
+    }
+
+    def "should delete all refresh token when logout when user app "() {
+        given:
+        def refreshToken = "testRefreshToken"
+        def user = userHelper.fetchUser(USERNAME)
+        authHelper.createRefreshToken(
+                user,
+                refreshToken,
+                LocalDateTime.now().minusMinutes(1)
+        )
+        and:
+        def dto = authHelper.buildRefreshTokenDto(
+                token: refreshToken
+        )
+        def request = new HttpEntity<>(dto)
+        when:
+        def response = restTemplate.exchange(
+                LOGOUT_TOKEN_URL,
+                HttpMethod.PUT,
+                request,
+                void
+        )
+        then:
+        response.statusCode == HttpStatus.OK
+        authHelper.checkIfTheRefreshTokenGotSafeDeleted()
+    }
+
+    def "should return OK status when trying to log out without refresh token existing"() {
+        given:
+        def refreshToken = "testRefreshToken"
+        and:
+        def dto = authHelper.buildRefreshTokenDto(
+                token: refreshToken
+        )
+        def request = new HttpEntity<>(dto)
+        when:
+        def response = restTemplate.exchange(
+                LOGOUT_TOKEN_URL,
+                HttpMethod.PUT,
+                request,
+                void
+        )
+        then:
+        response.statusCode == HttpStatus.OK
+    }
+
 }

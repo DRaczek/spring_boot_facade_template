@@ -5,9 +5,13 @@ import draczek.facadetemplate.auth.command.dto.LoginDto
 import draczek.facadetemplate.auth.command.dto.RegistrationDto
 import draczek.facadetemplate.auth.command.dto.ResetPasswordStepTwoDto
 import draczek.facadetemplate.common.enumerated.StatusEnum
+import draczek.facadetemplate.user.domain.command.RefreshToken
+import draczek.facadetemplate.user.domain.command.RefreshTokenHistoryRepository
+import draczek.facadetemplate.user.domain.command.RefreshTokenRepository
 import draczek.facadetemplate.user.domain.command.User
 import draczek.facadetemplate.user.domain.command.UserFacade
 import draczek.facadetemplate.user.domain.command.UserRepository
+import draczek.facadetemplate.user.domain.dto.RefreshTokenDto
 import draczek.facadetemplate.userActionToken.domain.command.UserActionToken
 import draczek.facadetemplate.userActionToken.domain.command.UserActionTokenRepository
 import draczek.facadetemplate.userActionToken.domain.enumerated.UserActionTokenEnum
@@ -29,6 +33,10 @@ class AuthHelper {
     UserActionTokenRepository userActionTokenRepository
     @Autowired
     UserFacade userFacade
+    @Autowired
+    RefreshTokenRepository refreshTokenRepository
+    @Autowired
+    RefreshTokenHistoryRepository refreshTokenHistoryRepository
 
     boolean checkUserStatus(String username, StatusEnum expectedStatus) {
         User user = userRepository.findOneByUsername(username).orElseThrow()
@@ -97,4 +105,27 @@ class AuthHelper {
     void registerInactiveUser(RegistrationDto dto) {
         authenticationFacade.register(dto)
     }
+
+    RefreshToken createRefreshToken(User user, String token, LocalDateTime expirationDate) {
+        RefreshToken refreshToken =   RefreshToken.builder()
+                .user(user)
+                .token(token)
+                .expirationDate(expirationDate)
+                .build()
+        refreshToken.setStatus(StatusEnum.ACTIVE)
+        return refreshTokenRepository.saveAndFlush(refreshToken)
+    }
+
+    RefreshTokenDto buildRefreshTokenDto(Map params = [:]){
+        new RefreshTokenDto(
+                params.getOrDefault("token", "token") as String
+        )
+    }
+
+    boolean checkIfTheRefreshTokenGotSafeDeleted() {
+        assert refreshTokenRepository.findAll().size() == 0
+        assert refreshTokenHistoryRepository.findAll().size() == 1
+        true
+    }
+
 }
