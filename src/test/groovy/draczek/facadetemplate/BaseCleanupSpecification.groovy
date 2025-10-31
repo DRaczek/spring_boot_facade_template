@@ -5,6 +5,8 @@ import draczek.facadetemplate.role.domain.command.RoleRepository
 import draczek.facadetemplate.user.domain.command.Account
 import draczek.facadetemplate.user.domain.command.AccountRepository
 import draczek.facadetemplate.user.domain.command.Account_
+import draczek.facadetemplate.user.domain.command.RefreshTokenHistoryRepository
+import draczek.facadetemplate.user.domain.command.RefreshTokenRepository
 import draczek.facadetemplate.user.domain.command.User
 import draczek.facadetemplate.user.domain.command.UserRepository
 import draczek.facadetemplate.user.domain.command.User_
@@ -34,12 +36,18 @@ class BaseCleanupSpecification extends BaseITSpecification {
     UserActionTokenRepository userActionTokenRepository
     @Autowired
     UserActionTokenHistoryRepository userActionTokenHistoryRepository
+    @Autowired
+    RefreshTokenRepository refreshTokenRepository
+    @Autowired
+    RefreshTokenHistoryRepository refreshTokenHistoryRepository
 
     void baseCleanup() {
         jdbcTemplate.execute("SET session_replication_role = replica;")
         userActionTokenHistoryRepository.deleteAllInBatch()
         userActionTokenRepository.deleteAllInBatch()
         addressRepository.deleteAllInBatch()
+        refreshTokenRepository.deleteAllInBatch()
+        refreshTokenHistoryRepository.deleteAllInBatch()
         accountRepository.deleteAllInBatch(
                 accountRepository.findAll(accountToDeleteSpecification())
         )
