@@ -35,6 +35,8 @@ class WebSecurityConfig {
       "/api/auth/activate",
       "/api/auth/reset-password/step-1",
       "/api/auth/reset-password/step-2",
+      "/api/auth/logout",
+      "/api/auth/refresh-token",
       "/swagger-resources/**",
       "/swagger-ui*",
       "/swagger-ui/**",
