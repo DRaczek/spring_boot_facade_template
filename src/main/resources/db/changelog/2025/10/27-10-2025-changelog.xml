@@ -244,6 +244,78 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="Damian Raczek" id="27102025-create_table_refresh_tokens" runOnChange="true">
+        <createTable tableName="refresh_tokens" schemaName="public">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="refresh_tokens_pkey" nullable="false" />
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="refresh_tokens_id_fkey" nullable="false" references="users(id)"/>
+            </column>
+            <column name="token" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expiration_date" type="timestamp with time zone"/>
+            <column name="created_date" type="timestamp with time zone"/>
+            <column name="user_id_created" type="bigint">
+                <constraints foreignKeyName="refresh_tokens_user_id_created_fkey" references="users(id)"/>
+            </column>
+            <column name="last_modified_date" type="timestamp with time zone"/>
+            <column name="user_id_last_modified" type="bigint">
+                <constraints foreignKeyName="refresh_tokens_user_id_last_modified_fkey" references="users(id)"/>
+            </column>
+            <column name="status" type="smallint" defaultValue="1" remarks="0 - DELETE; 1 - ACTIVE; 2 - INACTIVE;">
+                <constraints nullable="false" />
+            </column>
+            <column name="version" type="integer" defaultValue="1">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createIndex indexName="refresh_tokens_user_id_idx"
+                     schemaName="public"
+                     tableName="refresh_tokens"
+                     unique="true">
+            <column name="user_id" />
+        </createIndex>
+        <createIndex indexName="refresh_tokens_token_idx"
+                     schemaName="public"
+                     tableName="refresh_tokens"
+                     unique="true">
+            <column name="token" />
+        </createIndex>
+    </changeSet>
+    <changeSet author="Damian Raczek" id="27102025-create_table_refresh_tokens_history" runOnChange="true">
+        <createTable tableName="refresh_tokens_history" schemaName="public">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="refresh_tokens_history_pkey" nullable="false" />
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="refresh_tokens_history_user_id_fkey"
+                             nullable="false" references="users(id)"/>
+            </column>
+            <column name="token" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expiration_date" type="timestamp with time zone"/>
+            <column name="created_date" type="timestamp with time zone"/>
+            <column name="user_id_created" type="bigint">
+                <constraints foreignKeyName="refresh_tokens_history_user_id_created_fkey" references="users(id)"/>
+            </column>
+            <column name="last_modified_date" type="timestamp with time zone"/>
+            <column name="user_id_last_modified" type="bigint">
+                <constraints foreignKeyName="refresh_tokens_history_user_id_last_modified_fkey" references="users(id)"/>
+            </column>
+            <column name="status" type="smallint" defaultValue="1" remarks="0 - DELETE; 1 - ACTIVE; 2 - INACTIVE;">
+                <constraints nullable="false" />
+            </column>
+            <column name="version" type="integer" defaultValue="1">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+
+
     <changeSet id="27102025-grant_authorities_and_create_uidx" author="Damian Raczek">
         <sql>
             GRANT SELECT, UPDATE, INSERT ON TABLE public.users TO user_role;
@@ -251,6 +323,8 @@
             GRANT SELECT, UPDATE, INSERT ON TABLE public.roles TO user_role;
             GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE public.users_actions_tokens TO user_role;
             GRANT SELECT, UPDATE, INSERT ON TABLE public.users_actions_tokens_history TO user_role;
+            GRANT SELECT, UPDATE, INSERT ON TABLE public.refresh_tokens TO user_role;
+            GRANT SELECT, UPDATE, INSERT ON TABLE public.refresh_tokens_history TO user_role;
 
             CREATE UNIQUE INDEX users_username_idx ON users (username) WHERE status = 1;
         </sql>

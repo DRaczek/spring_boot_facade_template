@@ -4,15 +4,12 @@ import draczek.facadetemplate.auth.command.domain.AuthenticationFacade;
 import draczek.facadetemplate.auth.command.dto.LoginDto;
 import draczek.facadetemplate.auth.command.dto.RegistrationDto;
 import draczek.facadetemplate.auth.command.dto.ResetPasswordStepTwoDto;
+import draczek.facadetemplate.user.domain.dto.RefreshTokenDto;
 import draczek.facadetemplate.user.domain.dto.UserTokenDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Authentication package's controller.
@@ -73,5 +70,28 @@ public class AuthenticationController {
   public void stepTwoPasswordReset(@RequestBody ResetPasswordStepTwoDto dto) {
     authenticationFacade.stepTwoResetPassword(dto);
   }
+
+  /**
+   * Endpoint for refreshing user's token
+   */
+  @PostMapping("/refresh-token")
+  @Operation(summary = "Refreshing user's token")
+  @ResponseStatus(HttpStatus.OK)
+  public UserTokenDto refreshUserToken(@RequestBody RefreshTokenDto dto) {
+    return authenticationFacade.refreshUserToken(dto);
+  }
+
+  /**
+   * Logs out the user from the application.
+   *
+   * @param dto token dto containing refresh token
+   */
+  @PutMapping("/logout")
+  @Operation(summary = "Endpoint for logging out")
+  @ResponseStatus(HttpStatus.OK)
+  public void logoutUser(@RequestBody RefreshTokenDto dto) {
+    authenticationFacade.logoutUser(dto);
+  }
+
 
 }

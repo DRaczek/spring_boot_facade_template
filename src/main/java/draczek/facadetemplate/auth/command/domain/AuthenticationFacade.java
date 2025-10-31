@@ -3,8 +3,11 @@ package draczek.facadetemplate.auth.command.domain;
 import draczek.facadetemplate.auth.command.dto.LoginDto;
 import draczek.facadetemplate.auth.command.dto.RegistrationDto;
 import draczek.facadetemplate.auth.command.dto.ResetPasswordStepTwoDto;
+import draczek.facadetemplate.user.domain.command.UserFacade;
+import draczek.facadetemplate.user.domain.dto.RefreshTokenDto;
 import draczek.facadetemplate.user.domain.dto.UserTokenDto;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +27,8 @@ public class AuthenticationFacade {
   private final ActivationUseCase activationUseCase;
   private final StepOneResetPasswordUseCase stepOneResetPasswordUseCase;
   private final StepTwoResetPasswordUseCase stepTwoResetPasswordUseCase;
+  private final RefreshUserTokenUseCase refreshUserTokenUseCase;
+  private final UserFacade userFacade;
 
   /**
    * Service for user login.
@@ -65,4 +70,21 @@ public class AuthenticationFacade {
   public void stepTwoResetPassword(@NotNull ResetPasswordStepTwoDto dto) {
     stepTwoResetPasswordUseCase.reset(dto);
   }
+
+  /**
+   * Service for refreshing authentication token
+   */
+  public UserTokenDto refreshUserToken(@Valid @NotNull RefreshTokenDto dto) {
+    return refreshUserTokenUseCase.refresh(dto);
+  }
+
+  /**
+   * Logs out the user from the application by deleting the associated refresh token.
+   *
+   * @param dto dto containing refresh token etc.
+   */
+  public void logoutUser(@Valid @NotNull RefreshTokenDto dto) {
+    userFacade.logout(dto.getToken());
+  }
+
 }

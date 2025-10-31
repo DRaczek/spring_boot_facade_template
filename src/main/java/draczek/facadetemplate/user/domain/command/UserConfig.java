@@ -23,7 +23,10 @@ class UserConfig {
       PasswordEncoder passwordEncoder,
       FileStorageService fileStorageService,
       RoleFacade roleFacade,
-      AddressFacade addressFacade) {
+      AddressFacade addressFacade,
+      RefreshTokenRepository refreshTokenRepository,
+      RefreshTokenHistoryRepository refreshTokenHistoryRepository,
+      JwtUtils jwtUtils) {
     UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     SearchUserUseCase searchUserUseCase = new SearchUserUseCase(userRepository,
         userMapper,
@@ -49,10 +52,35 @@ class UserConfig {
         fileStorageService,
         addressFacade);
 
+    DeleteRefreshTokenUseCase deleteRefreshTokenUseCase = new DeleteRefreshTokenUseCase(
+        refreshTokenRepository,
+        refreshTokenHistoryRepository);
+
+    CreateRefreshTokenUseCase createRefreshTokenUseCase = new CreateRefreshTokenUseCase(
+        deleteRefreshTokenUseCase,
+        refreshTokenRepository,
+        jwtUtils);
+
+    SearchRefreshTokenUseCase searchRefreshTokenUseCase = new SearchRefreshTokenUseCase(
+        refreshTokenRepository);
+
+    RefreshRefreshTokenUseCase refreshRefreshTokenUseCase = new RefreshRefreshTokenUseCase(
+        searchRefreshTokenUseCase,
+        deleteRefreshTokenUseCase,
+        jwtUtils,
+        createRefreshTokenUseCase);
+
+    LogoutUserUseCase logoutUserUseCase = new LogoutUserUseCase(
+        refreshTokenRepository,
+        deleteRefreshTokenUseCase);
+
     return new UserFacade(
         searchUserUseCase,
         createUserUseCase,
         userValidationHelper,
-        updateUserUseCase);
+        updateUserUseCase,
+        createRefreshTokenUseCase,
+        refreshRefreshTokenUseCase,
+        logoutUserUseCase);
   }
 }

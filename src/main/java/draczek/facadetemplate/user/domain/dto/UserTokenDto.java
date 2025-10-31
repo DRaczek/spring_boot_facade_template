@@ -2,7 +2,7 @@ package draczek.facadetemplate.user.domain.dto;
 
 import static draczek.facadetemplate.user.domain.command.WebSecurityAuthTokenFilter.BEARER;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.Value;
@@ -20,7 +20,9 @@ public class UserTokenDto {
 
   String token;
 
-  Date expirationDate;
+  LocalDateTime expirationDate;
+
+  String refreshToken;
 
   String type = BEARER;
 }

@@ -1,6 +1,6 @@
 package draczek.facadetemplate.user.domain.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Value;
 
 /**
@@ -9,5 +9,5 @@ import lombok.Value;
 @Value
 public class JwtDto {
   String token;
-  Date expiration;
+  LocalDateTime expiration;
 }

@@ -5,10 +5,12 @@ import draczek.facadetemplate.user.domain.dto.JwtDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
+import java.time.ZoneId;
 import java.util.Date;
 
 /**
@@ -16,10 +18,21 @@ import java.util.Date;
  */
 @Slf4j
 @Component
+@Getter
 @RequiredArgsConstructor
 public class JwtUtils {
 
   private final JwtProperties jwtProperties;
+
+  /**
+   * Method for refresh token generation.
+   *
+   * @param username user name
+   * @return dto JwtDto
+   */
+  public JwtDto generateRefreshTokenFromUsername(String username) {
+    return generateToken(username, jwtProperties.getRefreshExpirationMs());
+  }
 
   /**
    * Method for token generation.
@@ -28,15 +41,19 @@ public class JwtUtils {
    * @return dto JwtDto
    */
   public JwtDto generateTokenFromUsername(String username) {
+    return generateToken(username, jwtProperties.getExpirationMs());
+  }
+
+  public JwtDto generateToken(String username, Long expirationMs) {
     Date issuedAt = new Date();
-    Date expiration = new Date(issuedAt.getTime() + jwtProperties.getExpirationMs());
+    Date expiration = new Date(issuedAt.getTime() + expirationMs);
     String token = Jwts.builder()
-        .subject(username)
-        .issuedAt(issuedAt)
-        .expiration(expiration)
-        .signWith(decodeSecret(), Jwts.SIG.HS512)
-        .compact();
-    return new JwtDto(token, expiration);
+            .subject(username)
+            .issuedAt(issuedAt)
+            .expiration(expiration)
+            .signWith(decodeSecret(), Jwts.SIG.HS512)
+            .compact();
+    return new JwtDto(token, expiration.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
   }
 
   /**

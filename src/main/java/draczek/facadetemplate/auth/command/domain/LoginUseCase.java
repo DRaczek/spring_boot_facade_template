@@ -3,6 +3,7 @@ package draczek.facadetemplate.auth.command.domain;
 import draczek.facadetemplate.auth.command.dto.LoginDto;
 import draczek.facadetemplate.user.domain.command.JwtUtils;
 import draczek.facadetemplate.user.domain.command.UserDetailsImpl;
+import draczek.facadetemplate.user.domain.command.UserFacade;
 import draczek.facadetemplate.user.domain.dto.JwtDto;
 import draczek.facadetemplate.user.domain.dto.UserTokenDto;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class LoginUseCase {
   private final JwtUtils jwtUtils;
   private final AuthenticationManager authenticationManager;
+  private final UserFacade userFacade;
 
   /**
    * Method for logging in.
@@ -41,6 +43,7 @@ class LoginUseCase {
         userDetails.getUsername(),
         roles,
         jwt.getToken(),
-        jwt.getExpiration());
+        jwt.getExpiration(),
+        userFacade.createRefreshToken(userDetails.getUserDetails().getAccount().getUser()).getToken());
   }
 }

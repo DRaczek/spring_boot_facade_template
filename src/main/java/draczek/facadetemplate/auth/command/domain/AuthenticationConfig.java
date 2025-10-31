@@ -25,7 +25,8 @@ class AuthenticationConfig {
 
     LoginUseCase loginUseCase = new LoginUseCase(
         jwtUtils,
-        authenticationManager);
+        authenticationManager,
+        userFacade);
 
     SendMailUseCase sendMailUseCase = new SendMailUseCase(emailSender);
 
@@ -48,7 +49,6 @@ class AuthenticationConfig {
         sendMailUseCase
     );
 
-
     StepTwoResetPasswordValidationHelper stepTwoResetPasswordValidationHelper
         = new StepTwoResetPasswordValidationHelper(securityFacade);
     StepTwoResetPasswordUseCase stepTwoResetPasswordUseCase = new StepTwoResetPasswordUseCase(
@@ -56,11 +56,17 @@ class AuthenticationConfig {
         userFacade,
         userActionTokenFacade);
 
+    RefreshUserTokenUseCase refreshUserTokenUseCase = new RefreshUserTokenUseCase(
+        userFacade,
+        jwtUtils);
+
     return new AuthenticationFacade(
         loginUseCase,
         registrationUseCase,
         activationUseCase,
         stepOneResetPasswordUseCase,
-        stepTwoResetPasswordUseCase);
+        stepTwoResetPasswordUseCase,
+        refreshUserTokenUseCase,
+        userFacade);
   }
 }

@@ -6,11 +6,13 @@ import draczek.facadetemplate.common.enumerated.StatusEnum;
 import draczek.facadetemplate.user.domain.dto.UpdateAccountDto;
 import draczek.facadetemplate.user.domain.dto.UserDto;
 import java.util.List;
-import jakarta.transaction.Transactional;
+import draczek.facadetemplate.user.domain.exception.RefreshTokenNotFoundException;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +28,9 @@ public class UserFacade {
   private final CreateUserUseCase createUserUseCase;
   private final UserValidationHelper userValidationHelper;
   private final UpdateUserUseCase updateUserUseCase;
+  private final CreateRefreshTokenUseCase createRefreshTokenUseCase;
+  private final RefreshRefreshTokenUseCase refreshRefreshTokenUseCase;
+  private final LogoutUserUseCase logoutUserUseCase;
 
   /**
    * Method for getting information about logged-in user.
@@ -103,4 +108,37 @@ public class UserFacade {
   public UserDto deleteProfilePicture() {
     return updateUserUseCase.deleteProfilePicture();
   }
+
+  /**
+   * Creates a new RefreshToken for the given user.
+   *
+   * @param user The user for which the RefreshToken is created.
+   * @return created RefreshToken entity.
+   */
+  public RefreshToken createRefreshToken(@NotNull User user) {
+    return createRefreshTokenUseCase.create(user);
+  }
+
+  /**
+   * Refreshes the RefreshToken.
+   *
+   * @param token The refresh token
+   * @return The refreshed RefreshToken.
+   * @throws RefreshTokenNotFoundException If the refresh token is not found.
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = RefreshTokenNotFoundException.class)
+  public RefreshToken refreshRefreshToken(@NotBlank String token)
+          throws RefreshTokenNotFoundException {
+    return refreshRefreshTokenUseCase.refresh(token);
+  }
+
+  /**
+   * Logs out the user by deleting the associated refresh token.
+   *
+   * @param refreshToken the refresh token of the user
+   */
+  public void logout(@NotBlank String refreshToken) {
+    logoutUserUseCase.logout(refreshToken);
+  }
+
 }
